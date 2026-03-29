@@ -4,7 +4,7 @@ Core OOP Classes: Task, Scheduler, WorkSession, UndoRedoManager, TaskHistory
 import uuid
 from datetime import datetime, timedelta
 from django.utils import timezone
-from .data_structures import PriorityQueue, Stack, Queue, LinkedList
+from .data_structures import PriorityQueue, Stack, Queue, LinkedList, STRATEGY_COMPLEXITY
 
 
 class Task:
@@ -136,11 +136,12 @@ class Task:
 
 
 class Scheduler:
-    """Scheduler class - Core scheduling logic and priority management"""
-    
+    """Scheduler class - Core scheduling logic and strategy selection."""
+
     def __init__(self):
         self.priority_queue = PriorityQueue()
         self.tasks = {}  # Store all tasks by ID for quick lookup
+        self.strategy = 'priority'
     
     def add_task(self, **task_data):
         """Add a new task to the scheduler"""
@@ -149,8 +150,20 @@ class Scheduler:
         self.priority_queue.enqueue(task)
         return task
     
+    def set_strategy(self, strategy):
+        """Set active scheduling strategy."""
+        if strategy in STRATEGY_COMPLEXITY:
+            self.strategy = strategy
+
     def get_next_task(self):
-        """Get the next highest priority task"""
+        """Get the next task based on the selected strategy."""
+        pending_tasks = [t for t in self.tasks.values() if t.status in ('pending', 'in-progress')]
+        if not pending_tasks:
+            return None
+        if self.strategy == 'fifo':
+            return sorted(pending_tasks, key=lambda t: t.created_at)[0]
+        if self.strategy == 'lifo':
+            return sorted(pending_tasks, key=lambda t: t.created_at, reverse=True)[0]
         return self.priority_queue.peek()
     
     def dequeue_next_task(self):
@@ -207,8 +220,19 @@ class Scheduler:
         return True
     
     def get_all_tasks(self):
-        """Get all tasks sorted by priority"""
-        return self.priority_queue.to_array()
+        """Get all tasks in the selected strategy order."""
+        active = [t for t in self.tasks.values() if t.status in ('pending', 'in-progress')]
+        done = [t for t in self.tasks.values() if t.status not in ('pending', 'in-progress')]
+
+        if self.strategy == 'fifo':
+            ordered_active = sorted(active, key=lambda t: t.created_at)
+        elif self.strategy == 'lifo':
+            ordered_active = sorted(active, key=lambda t: t.created_at, reverse=True)
+        else:
+            ordered_active = sorted(active, key=lambda t: t.priority_score)
+
+        ordered_done = sorted(done, key=lambda t: t.created_at, reverse=True)
+        return ordered_active + ordered_done
     
     def get_task(self, task_id):
         """Get a task by ID"""
@@ -244,7 +268,9 @@ class Scheduler:
             'in_progress': in_progress,
             'completed': completed,
             'skipped': skipped,
-            'average_priority': round(avg_priority, 2)
+            'average_priority': round(avg_priority, 2),
+            'strategy': self.strategy,
+            'strategy_meta': STRATEGY_COMPLEXITY[self.strategy],
         }
 
 

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Dashboard - Task Scheduler{% endblock %}
 
@@ -6,49 +7,73 @@
 <div class="dashboard-container">
     <div class="dashboard-header">
         <h2>Task Dashboard</h2>
-        <button class="btn btn-primary" onclick="openAddTaskModal()">+ Add Task</button>
+        <div class="dashboard-actions-inline">
+            <button class="btn btn-secondary" onclick="runDemoMode()">Run Demo</button>
+            <button class="btn btn-primary" onclick="openAddTaskModal()">+ Add Task</button>
+        </div>
+    </div>
+
+    <div class="strategy-panel">
+        <div>
+            <h3>Scheduling Strategy</h3>
+            <p class="muted">Select FIFO, LIFO, or Priority scheduling to reorder pending tasks.</p>
+        </div>
+        <div class="strategy-controls">
+            <select id="strategySelect" onchange="changeStrategy(this.value)">
+                {% for key, meta in strategies.items %}
+                <option value="{{ key }}" {% if key == current_strategy %}selected{% endif %}>{{ meta.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="algorithm-card">
+        <h4>{{ stats.strategy_meta.name }}</h4>
+        <p>Using <strong>{{ stats.strategy_meta.data_structure }}</strong></p>
+        <div class="complexity-row">
+            <span>Insert: {{ stats.strategy_meta.insert }}</span>
+            <span>Delete: {{ stats.strategy_meta.remove }}</span>
+            <span>Peek: {{ stats.strategy_meta.peek }}</span>
+        </div>
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card">
-            <h3>{{ stats.total }}</h3>
-            <p>Total Tasks</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ stats.pending }}</h3>
-            <p>Pending</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ stats.in_progress }}</h3>
-            <p>In Progress</p>
-        </div>
-        <div class="stat-card">
-            <h3>{{ stats.completed }}</h3>
-            <p>Completed</p>
-        </div>
+        <div class="stat-card"><h3>{{ stats.total }}</h3><p>Total Tasks</p></div>
+        <div class="stat-card"><h3>{{ stats.pending }}</h3><p>Pending</p></div>
+        <div class="stat-card"><h3>{{ stats.in_progress }}</h3><p>In Progress</p></div>
+        <div class="stat-card"><h3>{{ stats.completed }}</h3><p>Completed</p></div>
     </div>
 
     {% if next_task %}
     <div class="next-task-card">
-        <h3>🎯 Next Priority Task</h3>
+        <h3>🎯 Next Scheduled Task ({{ stats.strategy_meta.name }})</h3>
         <div class="task-item priority-highlight">
-            <div class="task-header">
-                <h4>{{ next_task.title }}</h4>
-                <span class="priority-badge">Priority: {{ next_task.priority_score }}</span>
-            </div>
-            <div class="task-details">
-                <span class="task-meta">Project: {{ next_task.project }}</span>
-                <span class="task-meta">Domain: {{ next_task.domain }}</span>
-                {% if next_task.deadline %}
-                <span class="task-meta">Deadline: {{ next_task.deadline|date:"M d, Y" }}</span>
-                {% endif %}
-            </div>
+            <div class="task-header"><h4>{{ next_task.title }}</h4><span class="priority-badge">Priority: {{ next_task.priority_score }}</span></div>
         </div>
     </div>
     {% endif %}
 
+    <div class="comparison-card">
+        <h3>Strategy Comparison Snapshot</h3>
+        <table class="comparison-table">
+            <thead><tr><th>Strategy</th><th>Data Structure</th><th>Avg Wait (hrs)</th><th>Completed</th><th>Insert</th><th>Remove</th></tr></thead>
+            <tbody>
+                {% for row in comparison_rows %}
+                <tr>
+                    <td>{{ row.name }}</td>
+                    <td>{{ row.data_structure }}</td>
+                    <td>{{ row.average_wait_hours }}</td>
+                    <td>{{ row.completed_count }}</td>
+                    <td>{{ row.insert }}</td>
+                    <td>{{ row.remove }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
     <div class="tasks-section">
-        <h3>All Tasks (Sorted by Priority)</h3>
+        <h3>All Tasks (Current strategy ordering)</h3>
         <div class="tasks-list" id="tasksList">
             {% for task in tasks %}
             <div class="task-item" data-task-id="{{ task.id }}">
@@ -59,16 +84,10 @@
                 <div class="task-details">
                     <span class="task-meta">Project: {{ task.project }}</span>
                     <span class="task-meta">Domain: {{ task.domain }}</span>
-                    <span class="task-meta">Difficulty: {{ task.difficulty }}/10</span>
                     <span class="task-meta">Effort: {{ task.estimated_effort }}h</span>
                     <span class="task-meta">Importance: {{ task.importance }}/10</span>
-                    {% if task.deadline %}
-                    <span class="task-meta">Deadline: {{ task.deadline|date:"M d, Y" }}</span>
-                    {% endif %}
                 </div>
-                <div class="task-status">
-                    <span class="status-badge status-{{ task.status }}">{{ task.status|title }}</span>
-                </div>
+                <div class="task-status"><span class="status-badge status-{{ task.status }}">{{ task.status|title }}</span></div>
                 <div class="task-actions">
                     {% if task.status == 'pending' %}
                     <button class="btn btn-sm btn-success" onclick="completeTask('{{ task.id }}')">Complete</button>
@@ -82,304 +101,33 @@
                 </div>
             </div>
             {% empty %}
-            <div class="empty-state">
-                <p>No tasks yet. Add your first task to get started!</p>
-            </div>
+            <div class="empty-state"><p>No tasks yet. Add your first task to get started!</p></div>
             {% endfor %}
         </div>
     </div>
 </div>
 
-<!-- Add Task Modal -->
-<div id="addTaskModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeAddTaskModal()">&times;</span>
-        <h2>Add New Task</h2>
-        <form id="addTaskForm">
-            <div class="form-group">
-                <label for="taskTitle">Title *</label>
-                <input type="text" id="taskTitle" name="title" required>
-            </div>
-            <div class="form-group">
-                <label for="taskProject">Project</label>
-                <input type="text" id="taskProject" name="project" value="General">
-            </div>
-            <div class="form-group">
-                <label for="taskDomain">Domain</label>
-                <input type="text" id="taskDomain" name="domain" value="General">
-            </div>
-            <div class="form-group">
-                <label for="taskDeadline">Deadline</label>
-                <input type="datetime-local" id="taskDeadline" name="deadline">
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="taskDifficulty">Difficulty (1-10)</label>
-                    <input type="number" id="taskDifficulty" name="difficulty" min="1" max="10" value="5">
-                </div>
-                <div class="form-group">
-                    <label for="taskEffort">Estimated Effort (hours)</label>
-                    <input type="number" id="taskEffort" name="estimated_effort" min="0.5" step="0.5" value="1">
-                </div>
-                <div class="form-group">
-                    <label for="taskImportance">Importance (1-10)</label>
-                    <input type="number" id="taskImportance" name="importance" min="1" max="10" value="5">
-                </div>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Add Task</button>
-                <button type="button" class="btn btn-secondary" onclick="closeAddTaskModal()">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Edit Task Modal -->
-<div id="editTaskModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeEditTaskModal()">&times;</span>
-        <h2>Edit Task</h2>
-        <form id="editTaskForm">
-            <input type="hidden" id="editTaskId" name="task_id">
-            <div class="form-group">
-                <label for="editTaskTitle">Title *</label>
-                <input type="text" id="editTaskTitle" name="title" required>
-            </div>
-            <div class="form-group">
-                <label for="editTaskProject">Project</label>
-                <input type="text" id="editTaskProject" name="project">
-            </div>
-            <div class="form-group">
-                <label for="editTaskDomain">Domain</label>
-                <input type="text" id="editTaskDomain" name="domain">
-            </div>
-            <div class="form-group">
-                <label for="editTaskDeadline">Deadline</label>
-                <input type="datetime-local" id="editTaskDeadline" name="deadline">
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="editTaskDifficulty">Difficulty (1-10)</label>
-                    <input type="number" id="editTaskDifficulty" name="difficulty" min="1" max="10">
-                </div>
-                <div class="form-group">
-                    <label for="editTaskEffort">Estimated Effort (hours)</label>
-                    <input type="number" id="editTaskEffort" name="estimated_effort" min="0.5" step="0.5">
-                </div>
-                <div class="form-group">
-                    <label for="editTaskImportance">Importance (1-10)</label>
-                    <input type="number" id="editTaskImportance" name="importance" min="1" max="10">
-                </div>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Update Task</button>
-                <button type="button" class="btn btn-secondary" onclick="closeEditTaskModal()">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
+{% include 'scheduler/partials/task_modals.html' %}
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Task management functions
-    function openAddTaskModal() {
-        document.getElementById('addTaskModal').style.display = 'block';
+function changeStrategy(strategy) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('strategy', strategy);
+    window.location.href = url.toString();
+}
+
+async function runDemoMode() {
+    const response = await fetch('/api/demo/', { method: 'POST', headers: {'Content-Type': 'application/json'} });
+    const result = await response.json();
+    if (result.success) {
+        alert(`Demo loaded with ${result.count} tasks`);
+        location.reload();
+    } else {
+        alert(result.error || 'Failed to run demo');
     }
-
-    function closeAddTaskModal() {
-        document.getElementById('addTaskModal').style.display = 'none';
-        document.getElementById('addTaskForm').reset();
-    }
-
-    function openEditTaskModal(taskId) {
-        // Fetch task data and populate form
-        fetch(`/api/tasks/`)
-            .then(response => response.json())
-            .then(data => {
-                const task = data.tasks.find(t => t.id === taskId);
-                if (task) {
-                    document.getElementById('editTaskId').value = task.id;
-                    document.getElementById('editTaskTitle').value = task.title;
-                    document.getElementById('editTaskProject').value = task.project;
-                    document.getElementById('editTaskDomain').value = task.domain;
-                    if (task.deadline) {
-                        const deadline = new Date(task.deadline);
-                        document.getElementById('editTaskDeadline').value = deadline.toISOString().slice(0, 16);
-                    }
-                    document.getElementById('editTaskDifficulty').value = task.difficulty;
-                    document.getElementById('editTaskEffort').value = task.estimated_effort;
-                    document.getElementById('editTaskImportance').value = task.importance;
-                    document.getElementById('editTaskModal').style.display = 'block';
-                }
-            });
-    }
-
-    function closeEditTaskModal() {
-        document.getElementById('editTaskModal').style.display = 'none';
-    }
-
-    function editTask(taskId) {
-        openEditTaskModal(taskId);
-    }
-
-    // Form submissions
-    document.getElementById('addTaskForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData);
-        
-        if (data.deadline) {
-            data.deadline = new Date(data.deadline).toISOString();
-        }
-
-        try {
-            const response = await fetch('/api/tasks/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-
-            const result = await response.json();
-            if (result.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + result.error);
-            }
-        } catch (error) {
-            alert('Error: ' + error.message);
-        }
-    });
-
-    document.getElementById('editTaskForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const taskId = formData.get('task_id');
-        const data = Object.fromEntries(formData);
-        delete data.task_id;
-        
-        if (data.deadline) {
-            data.deadline = new Date(data.deadline).toISOString();
-        }
-
-        try {
-            const response = await fetch(`/api/tasks/${taskId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-
-            const result = await response.json();
-            if (result.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + result.error);
-            }
-        } catch (error) {
-            alert('Error: ' + error.message);
-        }
-    });
-
-    async function completeTask(taskId) {
-        try {
-            const response = await fetch(`/api/tasks/${taskId}/complete/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            const result = await response.json();
-            if (result.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + result.error);
-            }
-        } catch (error) {
-            alert('Error: ' + error.message);
-        }
-    }
-
-    async function skipTask(taskId) {
-        if (!confirm('Are you sure you want to skip this task?')) return;
-        
-        try {
-            const response = await fetch(`/api/tasks/${taskId}/skip/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            const result = await response.json();
-            if (result.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + result.error);
-            }
-        } catch (error) {
-            alert('Error: ' + error.message);
-        }
-    }
-
-    async function deleteTask(taskId) {
-        if (!confirm('Are you sure you want to delete this task?')) return;
-        
-        try {
-            const response = await fetch(`/api/tasks/${taskId}/delete/`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            const result = await response.json();
-            if (result.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + result.error);
-            }
-        } catch (error) {
-            alert('Error: ' + error.message);
-        }
-    }
-
-    async function updateTaskStatus(taskId, status) {
-        try {
-            const response = await fetch(`/api/tasks/${taskId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ status: status })
-            });
-
-            const result = await response.json();
-            if (result.success) {
-                location.reload();
-            } else {
-                alert('Error: ' + result.error);
-            }
-        } catch (error) {
-            alert('Error: ' + error.message);
-        }
-    }
-
-    // Close modals when clicking outside
-    window.onclick = function(event) {
-        const addModal = document.getElementById('addTaskModal');
-        const editModal = document.getElementById('editTaskModal');
-        if (event.target == addModal) {
-            closeAddTaskModal();
-        }
-        if (event.target == editModal) {
-            closeEditTaskModal();
-        }
-    }
+}
 </script>
+<script src="{% static 'js/dashboard.js' %}"></script>
 {% endblock %}
-

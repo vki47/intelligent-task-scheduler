@@ -1,0 +1,39 @@
+<!-- Add Task Modal -->
+<div id="addTaskModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeAddTaskModal()">&times;</span>
+        <h2>Add New Task</h2>
+        <form id="addTaskForm">
+            <div class="form-group"><label for="taskTitle">Title *</label><input type="text" id="taskTitle" name="title" required></div>
+            <div class="form-group"><label for="taskProject">Project</label><input type="text" id="taskProject" name="project" value="General"></div>
+            <div class="form-group"><label for="taskDomain">Domain</label><input type="text" id="taskDomain" name="domain" value="General"></div>
+            <div class="form-group"><label for="taskDeadline">Deadline</label><input type="datetime-local" id="taskDeadline" name="deadline"></div>
+            <div class="form-row">
+                <div class="form-group"><label for="taskDifficulty">Difficulty (1-10)</label><input type="number" id="taskDifficulty" name="difficulty" min="1" max="10" value="5"></div>
+                <div class="form-group"><label for="taskEffort">Estimated Effort (hours)</label><input type="number" id="taskEffort" name="estimated_effort" min="0.5" step="0.5" value="1"></div>
+                <div class="form-group"><label for="taskImportance">Importance (1-10)</label><input type="number" id="taskImportance" name="importance" min="1" max="10" value="5"></div>
+            </div>
+            <div class="form-actions"><button type="submit" class="btn btn-primary">Add Task</button><button type="button" class="btn btn-secondary" onclick="closeAddTaskModal()">Cancel</button></div>
+        </form>
+    </div>
+</div>
+
+<div id="editTaskModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeEditTaskModal()">&times;</span>
+        <h2>Edit Task</h2>
+        <form id="editTaskForm">
+            <input type="hidden" id="editTaskId" name="task_id">
+            <div class="form-group"><label for="editTaskTitle">Title *</label><input type="text" id="editTaskTitle" name="title" required></div>
+            <div class="form-group"><label for="editTaskProject">Project</label><input type="text" id="editTaskProject" name="project"></div>
+            <div class="form-group"><label for="editTaskDomain">Domain</label><input type="text" id="editTaskDomain" name="domain"></div>
+            <div class="form-group"><label for="editTaskDeadline">Deadline</label><input type="datetime-local" id="editTaskDeadline" name="deadline"></div>
+            <div class="form-row">
+                <div class="form-group"><label for="editTaskDifficulty">Difficulty (1-10)</label><input type="number" id="editTaskDifficulty" name="difficulty" min="1" max="10"></div>
+                <div class="form-group"><label for="editTaskEffort">Estimated Effort (hours)</label><input type="number" id="editTaskEffort" name="estimated_effort" min="0.5" step="0.5"></div>
+                <div class="form-group"><label for="editTaskImportance">Importance (1-10)</label><input type="number" id="editTaskImportance" name="importance" min="1" max="10"></div>
+            </div>
+            <div class="form-actions"><button type="submit" class="btn btn-primary">Update Task</button><button type="button" class="btn btn-secondary" onclick="closeEditTaskModal()">Cancel</button></div>
+        </form>
+    </div>
+</div>

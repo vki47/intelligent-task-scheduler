@@ -1,0 +1,12 @@
+<li>
+    <div class="heap-node">
+        <strong>{{ node.task.title|truncatechars:28 }}</strong>
+        <span>p={{ node.task.priority_score }}</span>
+    </div>
+    {% if node.left or node.right %}
+    <ul>
+        {% if node.left %}{% include 'scheduler/partials/heap_node.html' with node=node.left %}{% endif %}
+        {% if node.right %}{% include 'scheduler/partials/heap_node.html' with node=node.right %}{% endif %}
+    </ul>
+    {% endif %}
+</li>

@@ -19,6 +19,7 @@
                     <li><a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a></li>
                     <li><a href="{% url 'calendar' %}" class="{% if request.resolver_match.url_name == 'calendar' %}active{% endif %}">Calendar</a></li>
                     <li><a href="{% url 'analytics' %}" class="{% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">Analytics</a></li>
+                    <li><a href="{% url 'heap_visualization' %}" class="{% if request.resolver_match.url_name == 'heap_visualization' %}active{% endif %}">Heap View</a></li>
                     <li><span class="user-name">{{ user.username }}</span></li>
                     <li><a href="{% url 'logout' %}" class="logout-btn">Logout</a></li>
                 {% else %}
