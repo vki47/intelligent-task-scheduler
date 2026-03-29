@@ -66,18 +66,27 @@ Average wait time is estimated by simulating each strategy over current pending 
 
 ## API Endpoints
 
-- `POST /api/tasks/` add task
-- `POST /api/tasks/<id>/` update task
-- `POST /api/tasks/<id>/complete/` complete task
-- `POST /api/tasks/<id>/skip/` skip task
-- `DELETE /api/tasks/<id>/delete/` delete task
-- `GET /api/tasks/` list tasks
-- `POST /api/strategy/` set strategy
-- `POST /api/demo/` load sample tasks
+- `GET /` - Dashboard view
+- `GET /dashboard/` - Dashboard view
+- `GET /calendar/` - Calendar view
+- `GET /analytics/` - Analytics view
+- `POST /api/tasks/` - Add new task
+- `POST /api/tasks/<id>/` - Update task
+- `POST /api/tasks/<id>/complete/` - Complete task
+- `POST /api/tasks/<id>/skip/` - Skip task
+- `DELETE /api/tasks/<id>/delete/` - Delete task
+- `GET /api/tasks/` - Get all tasks
+- `POST /api/undo/` - Undo last action
+- `POST /api/redo/` - Redo last undone action
 
-## Tech Stack
+## Contributing
 
-- Django 4.2+
-- SQLite (default)
-- Vanilla JS + HTML/CSS
-- Custom DSA implementations in `scheduler/data_structures.py`
+This is a project demonstrating:
+- Object-Oriented Programming (OOP) principles
+- Data Structures and Algorithms (DSA)
+- Full-stack web development
+- Django framework usage
+
+## License
+
+MIT License
