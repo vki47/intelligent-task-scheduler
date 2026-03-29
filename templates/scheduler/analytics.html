@@ -120,6 +120,26 @@
         </div>
     </div>
 
+
+    <div class="recent-history-section">
+        <h3>Comparison Dashboard</h3>
+        <table class="comparison-table">
+            <thead><tr><th>Strategy</th><th>Avg Wait Time (hrs)</th><th>Completed Tasks</th><th>Insert</th><th>Remove</th><th>Peek</th></tr></thead>
+            <tbody>
+                {% for row in comparison_rows %}
+                <tr>
+                    <td>{{ row.name }}</td>
+                    <td>{{ row.average_wait_hours }}</td>
+                    <td>{{ row.completed_count }}</td>
+                    <td>{{ row.insert }}</td>
+                    <td>{{ row.remove }}</td>
+                    <td>{{ row.peek }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
     <div class="recent-history-section">
         <h3>Recent Activity</h3>
         <div class="history-list">

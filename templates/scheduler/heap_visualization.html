@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Heap Visualization{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h2>Priority Queue Heap Visualization</h2>
+        <p class="muted">Binary min-heap tree of pending/in-progress tasks. Updates after each task operation.</p>
+    </div>
+
+    {% if heap_tree %}
+    <div class="heap-tree">
+        <ul class="tree-root">
+            {% include 'scheduler/partials/heap_node.html' with node=heap_tree %}
+        </ul>
+    </div>
+
+    <h3>Array Representation</h3>
+    <div class="heap-array">
+        {% for task in heap_nodes %}
+        <div class="heap-cell">#{{ forloop.counter0 }}<br>{{ task.title|truncatechars:20 }}<br><small>{{ task.priority_score }}</small></div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No heap nodes available. Add pending tasks on the dashboard.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1234,3 +1234,22 @@ html {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--border-hover);
 }
+
+.strategy-panel, .algorithm-card, .comparison-card {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 14px;
+    margin-bottom: 16px;
+    background: var(--bg-primary);
+}
+.strategy-panel { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.strategy-controls select { padding: 8px; border: 1px solid var(--border-color); }
+.muted { color: var(--text-secondary); }
+.dashboard-actions-inline { display: flex; gap: 10px; }
+.complexity-row { display: flex; gap: 14px; color: var(--text-secondary); margin-top: 8px; }
+.comparison-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.comparison-table th, .comparison-table td { border: 1px solid var(--border-color); padding: 8px; text-align: left; font-size: 13px; }
+.heap-tree ul { list-style: none; margin-left: 20px; padding-left: 14px; border-left: 1px dashed var(--border-color); }
+.heap-node { border: 1px solid var(--border-color); padding: 8px; margin: 8px 0; border-radius: 4px; display: inline-flex; gap: 10px; background: #fafafa; }
+.heap-array { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 12px; }
+.heap-cell { border: 1px solid var(--border-color); border-radius: 4px; padding: 8px; text-align: center; background: var(--bg-primary); }

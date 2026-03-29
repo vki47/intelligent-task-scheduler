@@ -1,162 +1,68 @@
 # Priority Task Scheduler
 
-A web-based productivity application designed to help professionals decide what to work on next using dynamic priority scoring and intelligent task scheduling.
+A polished Django + DSA mini-project that demonstrates how different task scheduling strategies change execution order, wait time, and performance.
 
 ## Features
 
-- **Dynamic Priority Scoring**: Tasks are automatically prioritized based on deadline urgency, complexity, and importance
-- **Priority Queue (Min-Heap)**: Most urgent tasks are always surfaced first
-- **Work Sessions**: Organize tasks into daily work sessions
-- **Undo/Redo**: Full undo/redo functionality for task management
-- **Task History**: Complete history tracking using linked lists
-- **Dashboard**: Overview of all tasks and priorities
-- **Calendar View**: Visualize tasks by deadline
-- **Analytics**: Track productivity and workload patterns
+- Multiple scheduling strategies: **FIFO (Queue)**, **LIFO (Stack)**, and **Priority (Min-Heap)**.
+- Dashboard strategy selector with real-time explanation of data structure and complexity.
+- Comparison dashboard for average wait time, completed task count, and operation complexities.
+- Heap visualization page with binary-tree rendering and array index representation.
+- Demo mode to auto-populate varied sample tasks for classroom/demo walkthroughs.
+- Calendar and analytics pages for productivity tracking.
 
-## Technical Architecture
+## DSA Concepts Used
 
-### Data Structures
-- **Priority Queue (Min-Heap)**: For efficient task scheduling
-- **Stack**: For undo/redo operations
-- **Queue**: For daily work sessions
-- **Linked List**: For task history tracking
+- **Queue (FIFO):** First task added is first to execute.
+- **Stack (LIFO):** Most recently added task executes first.
+- **Min-Heap Priority Queue:** Task with smallest priority score executes first.
+- **Linked List:** Stores task history entries.
+- **Stack Pair:** Undo/redo simulation using two stacks.
 
-### Object-Oriented Design
-- `Task`: Represents individual tasks with attributes
-- `PriorityQueue`: Min-heap implementation for task scheduling
-- `Scheduler`: Core scheduling logic and priority calculation
-- `WorkSession`: Manages daily work sessions
-- `UndoRedoManager`: Handles undo/redo operations
-- `TaskHistory`: Maintains task history using linked lists
+## Scheduling Strategies Explained
+
+### 1) FIFO Scheduling (Queue)
+- Best for fairness and preserving arrival order.
+- Insert: O(1), Remove: O(1), Peek: O(1).
+
+### 2) LIFO Scheduling (Stack)
+- Best when newest items are most relevant (short-term context switching).
+- Insert: O(1), Remove: O(1), Peek: O(1).
+
+### 3) Priority Scheduling (Min-Heap)
+- Best when urgency matters (deadline + importance + effort based score).
+- Insert: O(log n), Remove: O(log n), Peek: O(1).
+
+## Time & Space Complexity Analysis
+
+| Strategy | DS Used | Insert | Remove | Peek | Space |
+|---|---|---:|---:|---:|---:|
+| FIFO | Queue | O(1) | O(1) | O(1) | O(n) |
+| LIFO | Stack | O(1) | O(1) | O(1) | O(n) |
+| Priority | Min-Heap | O(log n) | O(log n) | O(1) | O(n) |
+
+Average wait time is estimated by simulating each strategy over current pending tasks and summing elapsed effort-hours before each completion.
 
 ## Setup Instructions
 
-### Prerequisites
-- Python 3.8 or higher
-- pip (Python package manager)
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd "hackathon for aat"
-   ```
-
-2. Create a virtual environment (recommended):
-   ```bash
-   python -m venv venv
-   
-   # On Windows:
-   venv\Scripts\activate
-   
-   # On macOS/Linux:
-   source venv/bin/activate
-   ```
-
-3. Install dependencies:
+1. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-
-4. Run database migrations:
+2. Run migrations:
    ```bash
-   python manage.py makemigrations
    python manage.py migrate
    ```
-
-5. Create a superuser (optional, for admin access):
-   ```bash
-   python manage.py createsuperuser
-   ```
-
-6. Start the development server:
+3. Start server:
    ```bash
    python manage.py runserver
    ```
 
-7. Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser
+## Key Pages
 
-### Production Deployment
-
-For production, configure:
-- Set `DEBUG = False` in `settings.py`
-- Update `SECRET_KEY` with a secure key
-- Configure proper database (PostgreSQL recommended)
-- Set up static files collection
-- Use a production WSGI server (e.g., Gunicorn)
-
-## Project Structure
-
-```
-.
-├── task_scheduler/          # Django project settings
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-├── scheduler/               # Main Django app
-│   ├── models.py           # Django models
-│   ├── views.py            # View functions
-│   ├── urls.py             # URL routing
-│   ├── data_structures.py  # Core data structures (PriorityQueue, Stack, Queue, LinkedList)
-│   └── core_classes.py     # OOP classes (Task, Scheduler, WorkSession, etc.)
-├── templates/              # HTML templates
-│   ├── base.html
-│   └── scheduler/
-│       ├── dashboard.html
-│       ├── calendar.html
-│       └── analytics.html
-├── static/                # Static files (CSS, JS)
-│   ├── css/
-│   │   └── style.css
-│   └── js/
-│       └── main.js
-├── manage.py              # Django management script
-└── requirements.txt       # Python dependencies
-```
-
-## Usage
-
-1. **Add Tasks**: Click "Add Task" and fill in the task details:
-   - Title (required)
-   - Project/Domain
-   - Deadline (optional)
-   - Difficulty Level (1-10)
-   - Estimated Effort (hours)
-   - Importance (1-10)
-
-2. **View Priority Queue**: The dashboard automatically shows tasks sorted by priority (lower score = higher priority)
-
-3. **Manage Tasks**: 
-   - Complete tasks when finished
-   - Skip tasks you don't want to do
-   - Edit task details to update priorities
-   - Delete tasks you no longer need
-
-4. **Calendar View**: See all tasks organized by their deadlines
-
-5. **Analytics**: Track your productivity with detailed statistics and insights
-
-## Priority Score Calculation
-
-The priority score is calculated using:
-- **Deadline Urgency**: Overdue tasks get highest priority, followed by tasks due soon
-- **Importance**: Higher importance = lower score (higher priority)
-- **Difficulty**: More complex tasks get slightly adjusted scores
-- **Estimated Effort**: Longer tasks get slightly lower priority
-
-**Lower score = Higher priority**
-
-## Technologies
-
-- **Backend**: Django 4.2+
-- **Frontend**: HTML5, CSS3, JavaScript (Vanilla JS)
-- **Database**: SQLite (development), PostgreSQL (production recommended)
-- **Data Structures**: Custom Python implementations of:
-  - Priority Queue (Min-Heap)
-  - Stack
-  - Queue
-  - Linked List
+- `/dashboard/` – strategy selector, DSA explanation, demo mode, live comparison snapshot.
+- `/analytics/` – productivity insights + strategy comparison dashboard.
+- `/heap/` – binary tree visualization for current min-heap state.
 
 ## API Endpoints
 
