@@ -175,7 +175,7 @@ The priority score is calculated using:
 
 ## Contributing
 
-This is a hackathon project demonstrating:
+This is a project demonstrating:
 - Object-Oriented Programming (OOP) principles
 - Data Structures and Algorithms (DSA)
 - Full-stack web development
