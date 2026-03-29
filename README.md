@@ -87,6 +87,4 @@ This is a project demonstrating:
 - Full-stack web development
 - Django framework usage
 
-## License
 
-MIT License
