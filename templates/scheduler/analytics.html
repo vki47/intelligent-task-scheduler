@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - Task Scheduler{% endblock %}
+
+{% block content %}
+<div class="analytics-container">
+    <div class="analytics-header">
+        <h2>Analytics & Insights</h2>
+        <p>Track your productivity and workload patterns</p>
+    </div>
+
+    <div class="analytics-grid">
+        <div class="analytics-card">
+            <h3>Task Statistics</h3>
+            <div class="stat-item">
+                <span class="stat-label">Total Tasks:</span>
+                <span class="stat-value">{{ stats.total }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Pending:</span>
+                <span class="stat-value">{{ stats.pending }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">In Progress:</span>
+                <span class="stat-value">{{ stats.in_progress }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Completed:</span>
+                <span class="stat-value">{{ stats.completed }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Skipped:</span>
+                <span class="stat-value">{{ stats.skipped }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Avg Priority Score:</span>
+                <span class="stat-value">{{ stats.average_priority }}</span>
+            </div>
+        </div>
+
+        <div class="analytics-card">
+            <h3>Effort Tracking</h3>
+            <div class="stat-item">
+                <span class="stat-label">Total Estimated Effort:</span>
+                <span class="stat-value">{{ total_effort }}h</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Completed Effort:</span>
+                <span class="stat-value">{{ completed_effort }}h</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Remaining Effort:</span>
+                <span class="stat-value">{{ remaining_effort }}h</span>
+            </div>
+            {% if total_effort > 0 %}
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {% widthratio completed_effort total_effort 100 %}%"></div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Completion Rate:</span>
+                <span class="stat-value">{% widthratio completed_effort total_effort 100 %}%</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="analytics-card">
+            <h3>Project Breakdown</h3>
+            <p class="card-description">Track task completion across different projects. Shows completed vs total tasks per project.</p>
+            {% if projects %}
+                {% for project, data in projects.items %}
+                <div class="project-item">
+                    <div class="project-header">
+                        <span class="project-name">{{ project }}</span>
+                        <span class="project-stats">
+                            <span class="stat-completed">{{ data.completed }}</span> completed of 
+                            <span class="stat-total">{{ data.total }}</span> total
+                        </span>
+                    </div>
+                    <div class="project-status-breakdown">
+                        {% if data.pending > 0 %}
+                            <span class="status-chip status-pending-chip">{{ data.pending }} Pending</span>
+                        {% endif %}
+                        {% if data.in_progress > 0 %}
+                            <span class="status-chip status-in-progress-chip">{{ data.in_progress }} In Progress</span>
+                        {% endif %}
+                        {% if data.completed > 0 %}
+                            <span class="status-chip status-completed-chip">{{ data.completed }} Completed</span>
+                        {% endif %}
+                        {% if data.skipped > 0 %}
+                            <span class="status-chip status-skipped-chip">{{ data.skipped }} Skipped</span>
+                        {% endif %}
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {% widthratio data.completed data.total 100 %}%"></div>
+                    </div>
+                    <div class="progress-text">
+                        {% widthratio data.completed data.total 100 %}% Complete
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty-state">No project data available</p>
+            {% endif %}
+        </div>
+
+        <div class="analytics-card">
+            <h3>History Statistics</h3>
+            <div class="stat-item">
+                <span class="stat-label">Total History Entries:</span>
+                <span class="stat-value">{{ history_stats.total_entries }}</span>
+            </div>
+            {% if history_stats.actions %}
+                {% for action, count in history_stats.actions.items %}
+                <div class="stat-item">
+                    <span class="stat-label">{{ action|title }}:</span>
+                    <span class="stat-value">{{ count }}</span>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="recent-history-section">
+        <h3>Recent Activity</h3>
+        <div class="history-list">
+            {% if recent_history %}
+                {% for entry in recent_history %}
+                <div class="history-item">
+                    <div class="history-action">
+                        <span class="action-badge action-{{ entry.action }}">{{ entry.action|title }}</span>
+                        <span class="history-task-id">Task ID: {{ entry.task_id|truncatechars:8 }}</span>
+                    </div>
+                    <div class="history-timestamp">
+                        {{ entry.timestamp|date:"M d, Y H:i" }}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>No recent activity</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
