@@ -43,18 +43,6 @@ A polished Django + DSA mini-project that demonstrates how different task schedu
 
 Average wait time is estimated by simulating each strategy over current pending tasks and summing elapsed effort-hours before each completion.
 
-## C-Core Branch Presentation Notes
-
-If your `main` branch README differs, use this branch (`feat/c-core-dsa` / current working branch) as the presentation source for the native integration work.
-
-### One-command demo run (C enabled)
-
-```bash
-./run_with_c_core.sh
-```
-
-This script builds `c_core/libscheduler_dsa.so`, runs C unit tests, runs Django migrations, and starts the server with the C-backed strategy runtime path active.
-
 ## C Core (DSA Runtime)
 
 The strategy ordering/simulation DSA runtime was moved into a C module (`c_core`) and integrated into Django via a thin `ctypes` adapter.
@@ -73,14 +61,6 @@ make -C c_core test
 ```
 
 ### Run app with C core enabled
-
-Quick path:
-
-```bash
-./run_with_c_core.sh
-```
-
-Manual path:
 
 1. Build the shared library:
    ```bash
