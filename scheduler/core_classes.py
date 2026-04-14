@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime, timedelta
 from django.utils import timezone
 from .data_structures import PriorityQueue, Stack, Queue, LinkedList, STRATEGY_COMPLEXITY
+from .c_core_adapter import order_tasks as c_order_tasks
 
 
 class Task:
@@ -160,11 +161,8 @@ class Scheduler:
         pending_tasks = [t for t in self.tasks.values() if t.status in ('pending', 'in-progress')]
         if not pending_tasks:
             return None
-        if self.strategy == 'fifo':
-            return sorted(pending_tasks, key=lambda t: t.created_at)[0]
-        if self.strategy == 'lifo':
-            return sorted(pending_tasks, key=lambda t: t.created_at, reverse=True)[0]
-        return self.priority_queue.peek()
+        ordered = c_order_tasks(self.strategy, pending_tasks)
+        return ordered[0] if ordered else None
     
     def dequeue_next_task(self):
         """Remove and return the next highest priority task"""
@@ -224,14 +222,8 @@ class Scheduler:
         active = [t for t in self.tasks.values() if t.status in ('pending', 'in-progress')]
         done = [t for t in self.tasks.values() if t.status not in ('pending', 'in-progress')]
 
-        if self.strategy == 'fifo':
-            ordered_active = sorted(active, key=lambda t: t.created_at)
-        elif self.strategy == 'lifo':
-            ordered_active = sorted(active, key=lambda t: t.created_at, reverse=True)
-        else:
-            ordered_active = sorted(active, key=lambda t: t.priority_score)
-
-        ordered_done = sorted(done, key=lambda t: t.created_at, reverse=True)
+        ordered_active = c_order_tasks(self.strategy, active)
+        ordered_done = c_order_tasks('lifo', done)
         return ordered_active + ordered_done
     
     def get_task(self, task_id):

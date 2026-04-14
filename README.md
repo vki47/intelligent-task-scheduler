@@ -43,6 +43,62 @@ A polished Django + DSA mini-project that demonstrates how different task schedu
 
 Average wait time is estimated by simulating each strategy over current pending tasks and summing elapsed effort-hours before each completion.
 
+## C-Core Branch Presentation Notes
+
+If your `main` branch README differs, use this branch (`feat/c-core-dsa` / current working branch) as the presentation source for the native integration work.
+
+### One-command demo run (C enabled)
+
+```bash
+./run_with_c_core.sh
+```
+
+This script builds `c_core/libscheduler_dsa.so`, runs C unit tests, runs Django migrations, and starts the server with the C-backed strategy runtime path active.
+
+## C Core (DSA Runtime)
+
+The strategy ordering/simulation DSA runtime was moved into a C module (`c_core`) and integrated into Django via a thin `ctypes` adapter.
+
+### What was moved to C
+
+- Strategy ordering for **Priority**, **FIFO**, and **LIFO** (`ccore_order_indices`).
+- Strategy simulation average wait-time computation (`ccore_simulate_strategy`, `ccore_average_wait`).
+- Python now delegates ordering/simulation calls through `scheduler/c_core_adapter.py` with automatic Python fallback if the shared library is missing.
+
+### Build / test C core
+
+```bash
+make -C c_core
+make -C c_core test
+```
+
+### Run app with C core enabled
+
+Quick path:
+
+```bash
+./run_with_c_core.sh
+```
+
+Manual path:
+
+1. Build the shared library:
+   ```bash
+   make -C c_core
+   ```
+2. Run Django:
+   ```bash
+   python manage.py runserver
+   ```
+
+If `c_core/libscheduler_dsa.so` is not present, the adapter falls back to the original Python implementation to preserve behavior.
+
+### Integration notes
+
+- Adapter file: `scheduler/c_core_adapter.py`
+- Scheduler strategy ordering path now calls C first, then falls back to Python.
+- Existing endpoints/UI behavior remains the same; integration is internal.
+
 ## Setup Instructions
 
 1. Install dependencies:
