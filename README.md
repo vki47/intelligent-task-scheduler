@@ -1,4 +1,4 @@
-# Priority Task Scheduler
+# Intelligent Task Scheduler
 
 A polished Django + DSA mini-project that demonstrates how different task scheduling strategies change execution order, wait time, and performance.
 
