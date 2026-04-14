@@ -2,6 +2,8 @@
 
 from collections import deque
 
+from .c_core_adapter import simulate_strategy as c_simulate_strategy
+
 
 STRATEGY_COMPLEXITY = {
     'priority': {
@@ -259,22 +261,4 @@ class LinkedList:
 
 def simulate_strategy(strategy, tasks):
     """Simulate completion order and average wait time for a strategy."""
-    if not tasks:
-        return {'completed_count': 0, 'average_wait_hours': 0.0}
-
-    ordered = list(tasks)
-    if strategy == 'priority':
-        ordered = sorted(tasks, key=lambda t: t.priority_score)
-    elif strategy == 'lifo':
-        ordered = list(reversed(tasks))
-
-    wait_sum = 0.0
-    elapsed = 0.0
-    for task in ordered:
-        wait_sum += elapsed
-        elapsed += float(task.estimated_effort)
-
-    return {
-        'completed_count': len(ordered),
-        'average_wait_hours': round(wait_sum / len(ordered), 2),
-    }
+    return c_simulate_strategy(strategy, tasks)
